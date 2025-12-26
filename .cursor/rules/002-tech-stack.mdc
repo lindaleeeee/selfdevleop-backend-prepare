@@ -1,0 +1,41 @@
+---
+description: Project technical stack definition
+alwaysApply: true
+# Technical Stack
+Referenced in: [001-project-overview.mdc](001-project-overview.mdc)
+
+## Backend Core
+- **Framework:** Spring Boot 4.0.1
+- **Language:** Java 21
+- **Build Tool:** Gradle
+- **API Style:** RESTful API
+- **Architecture:** Layered Architecture (Controller → Service → Repository)
+
+## Database
+- **Primary DB:** MySQL 8.x (InnoDB, utf8mb4)
+- **ORM:** Spring Data JPA / Hibernate
+- **Migration:** Flyway or Liquibase (TBD)
+
+## API Documentation
+- **OpenAPI/Swagger:** SpringDoc OpenAPI 3.x
+
+## Testing
+- **Unit Testing:** JUnit 5, Mockito
+- **Integration Testing:** Spring Boot Test, TestContainers (for DB)
+- **API Testing:** REST Assured (optional)
+
+## Security (Future)
+- **Authentication:** JWT (Spring Security)
+- **Encryption:** AES-256 for sensitive data at rest
+- **TLS:** TLS 1.2+ for all transit
+
+## Monitoring & Logging
+- **Logging:** SLF4J + Logback
+- **Monitoring:** Spring Boot Actuator (future)
+
+## See also:
+- [003-development-guidelines.mdc](003-development-guidelines.mdc) for usage guidelines
+- [400-spring-boot-rules.mdc](400-spring-boot-rules.mdc) for Spring Boot specific rules
+- [401-rest-api-design-rules.mdc](401-rest-api-design-rules.mdc) for REST API design patterns
+- [402-jpa-database-rules.mdc](402-jpa-database-rules.mdc) for JPA and database patterns
+- [403-exception-handling-rules.mdc](403-exception-handling-rules.mdc) for exception handling

@@ -1,0 +1,113 @@
+---
+description: Spring Boot development patterns and best practices
+globs: ["**/*.java"]
+alwaysApply: false
+# Spring Boot Development Guidelines
+
+## Project Structure
+Follow layered architecture pattern:
+```
+controller/     # REST API endpoints (@RestController)
+service/        # Business logic (@Service)
+repository/     # Data access (@Repository)
+entity/         # JPA entities (@Entity)
+dto/            # Data Transfer Objects (request/response)
+config/         # Configuration classes (@Configuration)
+exception/      # Custom exceptions and handlers (@ControllerAdvice)
+```
+
+## Naming Conventions
+- **Controllers:** `*Controller` (e.g., `HabitController`)
+- **Services:** `*Service` (e.g., `HabitService`)
+- **Repositories:** `*Repository` (e.g., `HabitRepository`)
+- **Entities:** Singular noun (e.g., `Habit`, `SessionLog`)
+- **DTOs:** `*Request`, `*Response`, or `*Dto` (e.g., `CreateHabitRequest`, `HabitResponse`)
+
+## Controller Guidelines
+- Use `@RestController` for REST APIs
+- Map to `/api/v1/*` paths for versioning
+- Use appropriate HTTP methods: GET (read), POST (create), PUT (update), DELETE (delete)
+- Return `ResponseEntity<T>` for fine-grained control over status codes
+- Use `@Valid` or `@Validated` for request validation
+- Keep controllers thin - delegate business logic to services
+
+**Example:**
+```java
+@RestController
+@RequestMapping("/api/v1/habits")
+public class HabitController {
+    private final HabitService habitService;
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<HabitResponse> getHabit(@PathVariable Long id) {
+        return ResponseEntity.ok(habitService.findById(id));
+    }
+    
+    @PostMapping
+    public ResponseEntity<HabitResponse> createHabit(@Valid @RequestBody CreateHabitRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(habitService.create(request));
+    }
+}
+```
+
+## Service Layer Guidelines
+- Use `@Service` annotation
+- Methods should be public (required for `@Transactional` AOP)
+- Use `@Transactional` for methods that modify data
+- Use `@Transactional(readOnly = true)` for read-only operations
+- Handle business logic and validation
+- Throw custom exceptions for business rule violations
+
+**Example:**
+```java
+@Service
+@Transactional
+public class HabitService {
+    private final HabitRepository habitRepository;
+    
+    @Transactional(readOnly = true)
+    public HabitResponse findById(Long id) {
+        Habit habit = habitRepository.findById(id)
+            .orElseThrow(() -> new HabitNotFoundException(id));
+        return HabitResponse.from(habit);
+    }
+    
+    public HabitResponse create(CreateHabitRequest request) {
+        // Business validation
+        if (habitRepository.existsByName(request.getName())) {
+            throw new HabitAlreadyExistsException(request.getName());
+        }
+        
+        Habit habit = Habit.builder()
+            .name(request.getName())
+            .icon(request.getIcon())
+            .build();
+        
+        return HabitResponse.from(habitRepository.save(habit));
+    }
+}
+```
+
+## Dependency Injection
+- Prefer constructor injection over field injection
+- Use `@RequiredArgsConstructor` (Lombok) for single constructor
+- Avoid `@Autowired` on fields (use constructor injection)
+
+## Configuration
+- Use `@Configuration` for configuration classes
+- Use `@ConfigurationProperties` for type-safe configuration
+- Externalize configuration to `application.properties` or `application.yml`
+- Use profiles (`application-dev.properties`, `application-prod.properties`)
+
+## Testing
+- Use `@SpringBootTest` for integration tests
+- Use `@WebMvcTest` for controller tests
+- Use `@MockBean` to mock dependencies
+- Use `@Testcontainers` for database integration tests
+- Follow AAA pattern: Arrange, Act, Assert
+
+## See also:
+- [401-rest-api-design-rules.mdc](401-rest-api-design-rules.mdc) for REST API patterns
+- [402-jpa-database-rules.mdc](402-jpa-database-rules.mdc) for database patterns
+- [403-exception-handling-rules.mdc](403-exception-handling-rules.mdc) for exception handling

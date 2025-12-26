@@ -1,0 +1,46 @@
+---
+description: Development standards and technology constraints
+globs: ["**/*"]
+alwaysApply: true
+---
+# Development Guidelines
+Referenced in: [001-project-overview.mdc](001-project-overview.mdc), [002-tech-stack.mdc](002-tech-stack.mdc)
+
+## Version Control
+- **System:** Git
+- **Repository:** GitHub
+- **Branching:** Git Flow / Feature Branch Workflow
+- **Commit Policy:** Atomic commits, Conventional Commits format.
+
+## Technology Constraints (C-TEC)
+- **Backend Core:** Java 21 + Spring Boot 4.0.1 (REST API).
+- **Database:** MySQL 8.x (InnoDB, utf8mb4).
+- **Build Tool:** Gradle (latest stable).
+- **API Documentation:** OpenAPI 3.x (SpringDoc).
+
+## Architecture Principles
+- **Layered Architecture:** Controller → Service → Repository pattern.
+- **RESTful Design:** Follow REST conventions for resource naming and HTTP methods.
+- **Security:**
+  - TLS 1.2+ for all transit (production).
+  - AES-256 for sensitive data at rest (future).
+  - User-level data isolation.
+- **Reliability:**
+  - Transaction management for data consistency.
+  - Proper exception handling with meaningful error messages.
+  - Data validation at API boundary.
+
+## Performance Standards (NFR)
+- **API Response Time:** Launcher screen < 1.0s (p95), Statistics < 1.5s (p95).
+- **Database Queries:** Optimize N+1 queries, use proper indexing.
+- **Availability:** 99.5% uptime SLA (production).
+
+## Development Priorities
+1. **Data Integrity:** Zero data loss for habit logs and session records.
+2. **API Reliability:** Consistent error handling and response formats.
+3. **Performance:** Optimize database queries and minimize response times.
+4. **Code Quality:** Follow Spring Boot best practices and maintain clean architecture.
+
+## See also:
+- [001-project-overview.mdc](001-project-overview.mdc)
+- [002-tech-stack.mdc](002-tech-stack.mdc)

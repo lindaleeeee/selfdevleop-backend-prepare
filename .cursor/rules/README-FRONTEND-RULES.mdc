@@ -1,0 +1,29 @@
+---
+description: Frontend rules reference (not applicable to backend-only project)
+alwaysApply: false
+# Frontend Rules Reference
+
+## Note
+The following rules (306-311, 312) are **frontend-specific** and are **not applicable** to the current backend-only project:
+
+- `306-react-vite-tailwind-rules.mdc` - React/Vite/Tailwind CSS guidelines
+- `308-zustand-state-management-rules.mdc` - Zustand state management
+- `309-react-router-v6-rules.mdc` - React Router v6 patterns
+- `310-react-hook-form-zod-rules.mdc` - React Hook Form + Zod validation
+- `311-recharts-visualization-rules.mdc` - Recharts data visualization
+- `312-premium-ux-design-guidelines.mdc` - Premium UX design guidelines
+
+## When to Use
+These rules should be **activated** when:
+- Developing frontend/mobile client applications
+- Creating web dashboard or admin panels
+- Building React-based user interfaces
+
+## Current Project Scope
+This backend project focuses on:
+- REST API development (Spring Boot)
+- Database design and management (JPA/MySQL)
+- Business logic implementation
+- API documentation (OpenAPI/Swagger)
+
+Frontend rules are kept for reference but are **not active** in this backend-only context.

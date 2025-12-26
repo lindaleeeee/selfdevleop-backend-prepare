@@ -1,0 +1,143 @@
+---
+description: REST API design patterns and conventions
+globs: ["**/controller/**/*.java", "**/dto/**/*.java"]
+alwaysApply: false
+# REST API Design Guidelines
+
+## URL Design
+- Use nouns, not verbs: `/api/v1/habits` not `/api/v1/getHabits`
+- Use plural nouns for collections: `/habits`, `/sessions`
+- Use hierarchical structure: `/habits/{habitId}/sessions`
+- Use kebab-case or camelCase consistently (prefer kebab-case for URLs)
+- Version APIs: `/api/v1/*` for future compatibility
+
+## HTTP Methods
+- **GET:** Retrieve resources (idempotent, safe)
+- **POST:** Create new resources
+- **PUT:** Replace entire resource (idempotent)
+- **PATCH:** Partial update (idempotent)
+- **DELETE:** Remove resource (idempotent)
+
+## Status Codes
+- **200 OK:** Successful GET, PUT, PATCH
+- **201 Created:** Successful POST (include Location header)
+- **204 No Content:** Successful DELETE
+- **400 Bad Request:** Invalid request data
+- **401 Unauthorized:** Authentication required
+- **403 Forbidden:** Insufficient permissions
+- **404 Not Found:** Resource doesn't exist
+- **409 Conflict:** Resource conflict (e.g., duplicate)
+- **422 Unprocessable Entity:** Validation errors
+- **500 Internal Server Error:** Server error (avoid exposing details)
+
+## Request/Response Patterns
+
+### Request DTOs
+- Separate DTOs for create and update operations
+- Use validation annotations (`@NotNull`, `@NotBlank`, `@Size`, `@Min`, `@Max`)
+- Don't expose internal entity structure
+
+**Example:**
+```java
+public class CreateHabitRequest {
+    @NotBlank(message = "Habit name is required")
+    @Size(min = 1, max = 100)
+    private String name;
+    
+    @NotBlank(message = "Icon is required")
+    private String icon;
+    
+    @Min(1)
+    @Max(1440)
+    private Integer defaultDurationMinutes;
+}
+```
+
+### Response DTOs
+- Always return DTOs, never entities directly
+- Include only necessary fields
+- Use builder pattern or mapper methods
+- Consistent structure across endpoints
+
+**Example:**
+```java
+public class HabitResponse {
+    private Long id;
+    private String name;
+    private String icon;
+    private Integer defaultDurationMinutes;
+    private LocalDateTime createdAt;
+    
+    public static HabitResponse from(Habit habit) {
+        return HabitResponse.builder()
+            .id(habit.getId())
+            .name(habit.getName())
+            .icon(habit.getIcon())
+            .defaultDurationMinutes(habit.getDefaultDurationMinutes())
+            .createdAt(habit.getCreatedAt())
+            .build();
+    }
+}
+```
+
+## Pagination
+- Use `Pageable` for list endpoints
+- Default page size: 20
+- Include pagination metadata in response
+
+**Example:**
+```java
+@GetMapping
+public ResponseEntity<Page<HabitResponse>> getHabits(
+    @PageableDefault(size = 20) Pageable pageable) {
+    return ResponseEntity.ok(habitService.findAll(pageable));
+}
+```
+
+## Filtering and Sorting
+- Use query parameters: `?status=active&sort=createdAt,desc`
+- Support common filters: date ranges, status, category
+- Document available filters in API documentation
+
+## Error Response Format
+- Consistent error response structure
+- Include error code, message, and field-level errors
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Request validation failed",
+    "fields": [
+      {
+        "field": "name",
+        "message": "Habit name is required"
+      }
+    ]
+  }
+}
+```
+
+## API Documentation
+- Use SpringDoc OpenAPI annotations
+- Document all endpoints with `@Operation`
+- Document request/response models with `@Schema`
+- Include example values
+
+**Example:**
+```java
+@Operation(summary = "Get habit by ID", description = "Retrieves a habit by its unique identifier")
+@ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Habit found"),
+    @ApiResponse(responseCode = "404", description = "Habit not found")
+})
+@GetMapping("/{id}")
+public ResponseEntity<HabitResponse> getHabit(@PathVariable Long id) {
+    // ...
+}
+```
+
+## See also:
+- [400-spring-boot-rules.mdc](400-spring-boot-rules.mdc) for Spring Boot patterns
+- [403-exception-handling-rules.mdc](403-exception-handling-rules.mdc) for error handling

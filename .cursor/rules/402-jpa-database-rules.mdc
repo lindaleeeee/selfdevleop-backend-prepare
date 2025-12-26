@@ -1,0 +1,187 @@
+---
+description: JPA and database patterns for Spring Boot
+globs: ["**/entity/**/*.java", "**/repository/**/*.java"]
+alwaysApply: false
+# JPA and Database Guidelines
+
+## Entity Design
+
+### Basic Annotations
+- Use `@Entity` on entity classes
+- Use `@Table(name = "table_name")` for custom table names
+- Use `@Id` with `@GeneratedValue` for primary keys
+- Use `@Column` for custom column mappings
+- Use `@CreatedDate` and `@LastModifiedDate` for audit fields
+
+**Example:**
+```java
+@Entity
+@Table(name = "habits")
+@EntityListeners(AuditingEntityListener.class)
+public class Habit {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(nullable = false, length = 100)
+    private String name;
+    
+    @Column(nullable = false, length = 50)
+    private String icon;
+    
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+}
+```
+
+### Relationships
+- Use `@OneToMany`, `@ManyToOne`, `@ManyToMany` appropriately
+- Always specify `mappedBy` for bidirectional relationships
+- Use `fetch = FetchType.LAZY` by default (avoid N+1 queries)
+- Use `@JoinColumn` for foreign key customization
+
+**Example:**
+```java
+@Entity
+public class Habit {
+    @OneToMany(mappedBy = "habit", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SessionLog> sessionLogs = new ArrayList<>();
+}
+
+@Entity
+public class SessionLog {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "habit_id", nullable = false)
+    private Habit habit;
+}
+```
+
+### Enums
+- Use `@Enumerated(EnumType.STRING)` to store enum as string (not ordinal)
+
+**Example:**
+```java
+@Enumerated(EnumType.STRING)
+@Column(nullable = false, length = 20)
+private HabitStatus status;
+```
+
+## Repository Guidelines
+
+### Interface Design
+- Extend `JpaRepository<Entity, ID>` for CRUD operations
+- Use query methods for simple queries
+- Use `@Query` for complex queries
+- Use `@Modifying` for update/delete queries
+
+**Example:**
+```java
+@Repository
+public interface HabitRepository extends JpaRepository<Habit, Long> {
+    // Query method
+    Optional<Habit> findByName(String name);
+    
+    boolean existsByName(String name);
+    
+    // Custom query
+    @Query("SELECT h FROM Habit h WHERE h.status = :status")
+    List<Habit> findByStatus(@Param("status") HabitStatus status);
+    
+    // Native query (use sparingly)
+    @Query(value = "SELECT * FROM habits WHERE created_at > :date", nativeQuery = true)
+    List<Habit> findRecentHabits(@Param("date") LocalDateTime date);
+}
+```
+
+### Query Optimization
+- Avoid N+1 queries - use `@EntityGraph` or `JOIN FETCH`
+- Use pagination for large datasets
+- Use projections/DTOs for read-only queries
+
+**Example:**
+```java
+@EntityGraph(attributePaths = {"sessionLogs"})
+@Query("SELECT h FROM Habit h WHERE h.id = :id")
+Optional<Habit> findByIdWithSessions(@Param("id") Long id);
+```
+
+## Transaction Management
+
+### Service Layer
+- Use `@Transactional` on service methods
+- Use `@Transactional(readOnly = true)` for read operations
+- Let exceptions propagate to trigger rollback
+
+**Example:**
+```java
+@Service
+@Transactional
+public class HabitService {
+    @Transactional(readOnly = true)
+    public Habit findById(Long id) {
+        return habitRepository.findById(id)
+            .orElseThrow(() -> new HabitNotFoundException(id));
+    }
+    
+    public Habit create(CreateHabitRequest request) {
+        Habit habit = new Habit();
+        habit.setName(request.getName());
+        return habitRepository.save(habit);
+    }
+}
+```
+
+## Database Migrations
+
+### Flyway (Recommended)
+- Create migration files: `V{version}__{description}.sql`
+- Use version numbers: V1, V2, V3...
+- Keep migrations idempotent when possible
+
+**Example:**
+```sql
+-- V1__create_habits_table.sql
+CREATE TABLE habits (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    icon VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+## Performance Best Practices
+
+### Indexing
+- Add indexes for frequently queried columns
+- Use composite indexes for multi-column queries
+- Avoid over-indexing (slows down writes)
+
+**Example:**
+```java
+@Entity
+@Table(name = "session_logs", indexes = {
+    @Index(name = "idx_habit_id", columnList = "habit_id"),
+    @Index(name = "idx_created_at", columnList = "created_at")
+})
+public class SessionLog {
+    // ...
+}
+```
+
+### Batch Operations
+- Use `saveAll()` for batch inserts
+- Configure batch size: `spring.jpa.properties.hibernate.jdbc.batch_size=20`
+
+### Connection Pooling
+- Use HikariCP (default in Spring Boot)
+- Configure pool size appropriately for your workload
+
+## See also:
+- [400-spring-boot-rules.mdc](400-spring-boot-rules.mdc) for Spring Boot patterns
+- [403-exception-handling-rules.mdc](403-exception-handling-rules.mdc) for error handling

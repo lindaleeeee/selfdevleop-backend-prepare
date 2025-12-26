@@ -1,0 +1,62 @@
+---
+description: Defines the project build steps, environment variable setup for development and deployment.
+alwaysApply: false
+# BUILDING PROCESS
+
+## Build Commands
+- **Development:** `./gradlew bootRun` or `./gradlew build && java -jar build/libs/*.jar`
+- **Test:** `./gradlew test`
+- **Build JAR:** `./gradlew clean build`
+- **Run Tests:** `./gradlew test`
+
+## Project Structure
+```
+src/
+  main/
+    java/
+      vibe/selfdevleop/selfdevleop_backend_prepare/
+        controller/     # REST API controllers
+        service/        # Business logic
+        repository/     # Data access layer
+        entity/         # JPA entities
+        dto/            # Data Transfer Objects
+        config/         # Configuration classes
+        exception/      # Custom exceptions
+    resources/
+      application.properties
+      application-dev.properties
+      application-prod.properties
+  test/
+    java/               # Test classes
+```
+
+# ENV VARIABLES FOR DEVELOPMENT
+
+## application-dev.properties
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/habit_launcher_dev
+spring.datasource.username=dev_user
+spring.datasource.password=dev_password
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+logging.level.org.springframework.web=DEBUG
+```
+
+# ENV VARIABLES FOR DEPLOYMENT
+
+## application-prod.properties
+```properties
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=false
+logging.level.root=INFO
+server.port=${SERVER_PORT:8080}
+```
+
+## Environment Variables
+- `DB_URL`: MySQL connection URL
+- `DB_USERNAME`: Database username
+- `DB_PASSWORD`: Database password
+- `SERVER_PORT`: Server port (default: 8080)

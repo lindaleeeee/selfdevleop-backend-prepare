@@ -1,0 +1,232 @@
+---
+description: Exception handling patterns and error response structure
+globs: ["**/exception/**/*.java", "**/controller/**/*.java"]
+alwaysApply: false
+# Exception Handling Guidelines
+
+## Custom Exception Hierarchy
+
+### Base Exception
+Create a base exception class for all custom exceptions:
+
+```java
+public abstract class AppException extends RuntimeException {
+    private final ErrorCode errorCode;
+    
+    protected AppException(ErrorCode errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+    
+    protected AppException(ErrorCode errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+    
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
+}
+```
+
+### Domain-Specific Exceptions
+Create specific exceptions for each domain:
+
+```java
+public class HabitNotFoundException extends AppException {
+    public HabitNotFoundException(Long id) {
+        super(ErrorCode.HABIT_NOT_FOUND, 
+            String.format("Habit with id %d not found", id));
+    }
+}
+
+public class HabitAlreadyExistsException extends AppException {
+    public HabitAlreadyExistsException(String name) {
+        super(ErrorCode.HABIT_ALREADY_EXISTS,
+            String.format("Habit with name '%s' already exists", name));
+    }
+}
+```
+
+## Error Code Enum
+Define error codes for consistent error handling:
+
+```java
+public enum ErrorCode {
+    // Habit errors
+    HABIT_NOT_FOUND("HABIT_001", "Habit not found"),
+    HABIT_ALREADY_EXISTS("HABIT_002", "Habit already exists"),
+    
+    // Validation errors
+    VALIDATION_ERROR("VALIDATION_001", "Validation failed"),
+    
+    // Generic errors
+    INTERNAL_SERVER_ERROR("SERVER_001", "Internal server error");
+    
+    private final String code;
+    private final String message;
+    
+    ErrorCode(String code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+    
+    public String getCode() { return code; }
+    public String getMessage() { return message; }
+}
+```
+
+## Global Exception Handler
+
+### Controller Advice
+Use `@ControllerAdvice` to handle exceptions globally:
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ErrorResponse> handleAppException(AppException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+            .code(ex.getErrorCode().getCode())
+            .message(ex.getMessage())
+            .timestamp(LocalDateTime.now())
+            .build();
+        
+        HttpStatus status = determineHttpStatus(ex);
+        return ResponseEntity.status(status).body(error);
+    }
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex) {
+        List<FieldError> fieldErrors = ex.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -> FieldError.builder()
+                .field(error.getField())
+                .message(error.getDefaultMessage())
+                .build())
+            .toList();
+        
+        ErrorResponse error = ErrorResponse.builder()
+            .code(ErrorCode.VALIDATION_ERROR.getCode())
+            .message(ErrorCode.VALIDATION_ERROR.getMessage())
+            .fieldErrors(fieldErrors)
+            .timestamp(LocalDateTime.now())
+            .build();
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+    
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+        log.error("Unexpected error", ex);
+        
+        ErrorResponse error = ErrorResponse.builder()
+            .code(ErrorCode.INTERNAL_SERVER_ERROR.getCode())
+            .message("An unexpected error occurred")
+            .timestamp(LocalDateTime.now())
+            .build();
+        
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+    
+    private HttpStatus determineHttpStatus(AppException ex) {
+        return switch (ex.getErrorCode()) {
+            case HABIT_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case HABIT_ALREADY_EXISTS -> HttpStatus.CONFLICT;
+            case VALIDATION_ERROR -> HttpStatus.BAD_REQUEST;
+            default -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
+    }
+}
+```
+
+## Error Response DTO
+
+### Structure
+Create a consistent error response structure:
+
+```java
+@Builder
+public class ErrorResponse {
+    private String code;
+    private String message;
+    private List<FieldError> fieldErrors;
+    private LocalDateTime timestamp;
+    
+    @Builder
+    public static class FieldError {
+        private String field;
+        private String message;
+    }
+}
+```
+
+### Example Response
+```json
+{
+  "code": "VALIDATION_001",
+  "message": "Validation failed",
+  "fieldErrors": [
+    {
+      "field": "name",
+      "message": "Habit name is required"
+    }
+  ],
+  "timestamp": "2025-01-15T10:30:00"
+}
+```
+
+## Validation Exception Handling
+
+### Request Validation
+Use `@Valid` on controller parameters:
+
+```java
+@PostMapping
+public ResponseEntity<HabitResponse> createHabit(
+        @Valid @RequestBody CreateHabitRequest request) {
+    // ...
+}
+```
+
+### Custom Validators
+Create custom validators for complex validation:
+
+```java
+@Target({ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = HabitNameValidator.class)
+public @interface ValidHabitName {
+    String message() default "Invalid habit name";
+    Class<?>[] groups() default {};
+    Class<? extends Payload>[] payload() default {};
+}
+```
+
+## Logging Best Practices
+
+### Exception Logging
+- Log exceptions with appropriate level (ERROR for unexpected, WARN for business exceptions)
+- Include context information (user ID, request parameters)
+- Don't log sensitive information (passwords, tokens)
+
+```java
+@ExceptionHandler(AppException.class)
+public ResponseEntity<ErrorResponse> handleAppException(AppException ex) {
+    log.warn("Business exception: {}", ex.getMessage(), ex);
+    // ...
+}
+
+@ExceptionHandler(Exception.class)
+public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+    log.error("Unexpected error occurred", ex);
+    // ...
+}
+```
+
+## See also:
+- [400-spring-boot-rules.mdc](400-spring-boot-rules.mdc) for Spring Boot patterns
+- [401-rest-api-design-rules.mdc](401-rest-api-design-rules.mdc) for API design
