@@ -14,7 +14,24 @@ alwaysApply: false
 1. **이슈 제목 형식**: `[#NNN] Task Title` (예: `[#001] 프로젝트 초기화`)
 2. **라벨 구성**: `priority-N`, `type:feature|refactoring|setup`, `epic:epic-name` (마일스톤 사용 금지)
 3. **본문 소스**: `--body-file` 옵션으로 마크다운 파일 직접 사용
-4. **날짜 관리**: Project V2의 `Start Date`/`End Date` 필드 사용 (마일스톤 대체)
+4. **날짜 관리**: Project V2의 `Start date`/`Target date` 필드 사용 (마일스톤 대체)
+   - **필수**: 모든 이슈는 프로젝트에 추가 후 날짜 설정 필요
+   - **로드맵 표시**: 날짜가 설정되어야 GitHub Project의 Roadmap 뷰에서 표시됨
+   - **날짜 형식**: `YYYY-MM-DD` (예: `2025-12-28`)
+   - **설정 방법**:
+     ```bash
+     # 필드 ID 확인
+     gh project field-list <project-number> --owner <username> --format json
+     
+     # 아이템 ID 확인
+     gh project item-list <project-number> --owner <username> --format json
+     
+     # Start date 설정
+     gh project item-edit --project-id <ProjectNodeID> --id <ItemID> --field-id <StartDateFieldID> --date YYYY-MM-DD
+     
+     # Target date 설정
+     gh project item-edit --project-id <ProjectNodeID> --id <ItemID> --field-id <TargetDateFieldID> --date YYYY-MM-DD
+     ```
 
 ## Examples
 <example>
