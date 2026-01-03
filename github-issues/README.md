@@ -9,7 +9,9 @@
 ```
 github-issues/
 ├── README.md (본 파일)
+├── CHANGES.md (이슈 발행 변경사항 추적)
 ├── ISSUE_EXECUTION_ORDER.md (이슈 수행 순서 및 병렬 개발 가이드)
+├── COMPLETED_ISSUES.md (완료된 이슈 목록)
 ├── 001-init-config.md
 ├── 002-frontend-poc-optimization.md
 ├── 003-habit-management.md
@@ -104,7 +106,9 @@ github-issues/
 
 ## 🔗 관련 문서
 
+- [이슈 발행 변경사항 추적](CHANGES.md) - GitHub 이슈 발행 현황 및 변경 이력
 - [이슈 수행 순서 가이드](ISSUE_EXECUTION_ORDER.md)
+- [완료된 이슈 목록](COMPLETED_ISSUES.md)
 - [Task 추출 결과](Tasks%20copy/6.%20Task%EC%B6%94%EC%B6%9C%EA%B2%B0%EA%B3%BC.md)
 - [MVP 개발 Task 추출 통합 작업계획](../Digital-minimalist-project_Self-development%20copy/6-1.MVP%EA%B0%9C%EB%B0%9C-Task%EC%B6%94%EC%B6%9C%ED%86%B5%ED%95%A9%EC%9E%91%EC%97%85%EA%B3%84%ED%9A%8D.md)
 

@@ -270,6 +270,23 @@ src/
 
 ## 📚 API 문서
 
+### API 설계 다이어그램
+
+API 요청부터 응답까지의 데이터 흐름을 시각화한 다이어그램:
+- **문서**: [docs/05-api-design-diagrams.md](docs/05-api-design-diagrams.md)
+- **내용**: 시퀀스 다이어그램 (Mermaid)을 통한 API 데이터 흐름 시각화
+- **활용**: API 구현 전 설계 확인, 컨트롤러-서비스-리포지토리 계층 간 상호작용 파악
+
+### 데이터 아키텍처 (ERD, CLD, ORM)
+
+데이터베이스 설계부터 백엔드 구현까지의 전체 데이터 아키텍처:
+- **문서**: [docs/06-data-architecture-erd-cld-orm.md](docs/06-data-architecture-erd-cld-orm.md)
+- **내용**: 
+  - **ERD**: 데이터베이스 테이블 구조 및 관계 다이어그램
+  - **CLD**: 백엔드 클래스 다이어그램 및 3-Tier 아키텍처
+  - **ORM**: JPA Entity, Repository, Service, Controller 예제코드
+- **활용**: 데이터베이스 설계 확인, 백엔드 아키텍처 이해, ERD → CLD → ORM 구현 흐름 파악
+
 ### Swagger UI
 
 API 문서는 Swagger UI를 통해 제공됩니다 (설정 후):
