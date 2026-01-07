@@ -6,6 +6,7 @@
 **Labels:** `epic:habit`, `type:backend`, `type:database`  
 **Related REQ:** REQ-FUNC-001, REQ-FUNC-002, REQ-FUNC-003  
 **Dependencies:** #001 ✅ (완료)  
+**Parallelizable With:** #004, #011  
 **Blocks:** #005, #007, #009
 
 ---
@@ -14,12 +15,53 @@
 
 사용자가 습관을 생성, 수정, 삭제할 수 있는 데이터 레이어와 비즈니스 로직을 구현합니다.
 
+## 📌 Scope / Out of Scope
+
+### In Scope
+- Habit Entity 및 Repository 구현
+- 습관 CRUD API (생성, 조회, 수정, 삭제)
+- 습관 활성 요일 설정 및 필터링
+- Soft Delete (아카이브) 기능
+- 입력값 유효성 검사 및 예외 처리
+- 기본적인 단위 테스트 및 통합 테스트
+
+### Out of Scope
+- 사용자 인증/인가 (별도 이슈에서 처리)
+- 습관 통계 및 분석 (#007에서 처리)
+- 습관 목표 설정 (#007에서 처리)
+- 습관 로그 기록 (#005에서 처리)
+- 프론트엔드 UI 구현 (별도 프로젝트에서 완료)
+
 ## 🎯 Goals
 
 - Habit Entity 및 Repository 구현
 - 습관 CRUD API 구현
 - 습관 활성 요일 설정 기능 구현
 - 습관 관리 비즈니스 로직 구현
+
+## 🛠️ Technical Stack
+
+**Backend Core:**
+- Java 21 LTS
+- Spring Boot 4.0.1
+- Spring Data JPA / Hibernate 7.2.0
+- Gradle 9.2.1
+
+**Database:**
+- MySQL 8.x (Production)
+- H2 Database (Development/Testing)
+
+**API:**
+- RESTful API (JSON)
+- OpenAPI 3.0 (Swagger/SpringDoc)
+
+**Validation:**
+- Jakarta Bean Validation (`@Valid`, `@NotBlank`, `@Size`, etc.)
+
+**Testing:**
+- JUnit 5
+- Mockito
+- Spring Boot Test
 
 ## ✅ Tasks
 
@@ -253,92 +295,209 @@
 
 ---
 
-### 4. Logic Steps 상세
+### 4. Logic Steps (런타임 처리 순서)
 
-#### 습관 생성 (create)
-1. **Request Validation** (Controller Layer)
-   - `@Valid` 어노테이션으로 DTO 검증
-   - 필수 필드, 타입, 범위 검사
-   - 실패 시: `400 Bad Request` 반환
+#### POST /api/v1/habits - 습관 생성
 
-2. **Business Validation** (Service Layer)
-   - 중복 이름 체크 (`existsByName()`)
-   - 실패 시: `HabitAlreadyExistsException` → `409 Conflict`
+**실행 순서:**
+1. **HTTP Request 수신** (Controller)
+   - `@PostMapping` 핸들러 메서드 호출
+   - Request Body를 `CreateHabitRequest` DTO로 역직렬화
 
-3. **Entity 생성**
-   - DTO → Entity 변환
-   - 기본값 설정 (color, defaultDuration)
-   - `@CreatedDate`, `@LastModifiedDate` 자동 설정
+2. **Request Validation** (Controller Layer)
+   - `@Valid` 어노테이션으로 DTO 검증 실행
+   - `@NotBlank`, `@Size`, `@Pattern` 등 검증 어노테이션 체크
+   - 실패 시: `MethodArgumentNotValidException` → `GlobalExceptionHandler` → `400 Bad Request` 반환
 
-4. **저장** (`@Transactional`)
-   - `repository.save(habit)`
-   - 실패 시: 트랜잭션 롤백
+3. **Service 메서드 호출** (`HabitService.create()`)
+   - Controller → Service 의존성 주입 호출
 
-5. **응답 생성**
-   - Entity → Response DTO 변환
-   - `201 Created` + `Location` 헤더 반환
+4. **트랜잭션 시작** (`@Transactional`)
+   - Spring AOP가 트랜잭션 시작
 
-#### 습관 수정 (update)
-1. Request Validation
-2. **리소스 존재 확인**
-   - `findById(id)` → 없으면 `404 Not Found`
-3. Business Validation (중복 이름 체크, 단 자신 제외)
-4. Entity 업데이트
-5. 저장 (`@Transactional`)
-6. 응답 생성 (`200 OK`)
+5. **Business Validation** (Service Layer)
+   - `habitRepository.existsByName(request.getName())` 실행
+   - 중복 발견 시: `HabitAlreadyExistsException` throw → `409 Conflict` 반환
 
-#### 습관 삭제 (delete)
-1. **리소스 존재 확인**
-   - `findById(id)` → 없으면 `404 Not Found`
-2. **Soft Delete 처리**
-   - `isArchived = true` 설정
-   - 또는 `@SQLDelete` 사용
-3. 저장 (`@Transactional`)
-4. 응답 (`204 No Content`)
+6. **Entity 생성** (Service Layer)
+   - `Habit.builder()` 사용하여 Entity 생성
+   - 기본값 설정: `color = request.getColor() != null ? request.getColor() : "#4A90E2"`
+   - 기본값 설정: `defaultDuration = request.getDefaultDuration() != null ? request.getDefaultDuration() : 30`
+   - `activeDays` 리스트 설정
 
-#### 요일별 조회 (findByDayOfWeek)
-1. **쿼리 파라미터 파싱**
-   - `dayOfWeek` 검증 (MONDAY ~ SUNDAY)
-2. **Repository 쿼리 실행**
-   - `findByActiveDaysContaining(dayOfWeek)`
-3. **필터링** (archived 제외)
-4. **정렬 및 페이지네이션**
-5. **응답 생성** (`200 OK`)
+7. **데이터베이스 저장** (Repository Layer)
+   - `habitRepository.save(habit)` 실행
+   - JPA가 INSERT 쿼리 생성 및 실행
+   - `@CreatedDate`, `@LastModifiedDate` 자동 설정 (JPA Auditing)
+
+8. **트랜잭션 커밋** (`@Transactional`)
+   - Spring AOP가 트랜잭션 커밋
+
+9. **Entity → DTO 변환** (Service Layer)
+   - `HabitResponse.from(savedHabit)` 정적 팩토리 메서드 호출
+   - Entity의 모든 필드를 DTO로 복사
+
+10. **HTTP Response 생성** (Controller)
+    - `ResponseEntity.status(HttpStatus.CREATED).location(location).body(habitResponse)` 생성
+    - `Location: /api/v1/habits/{id}` 헤더 추가
+    - `201 Created` 상태 코드와 함께 응답 반환
+
+#### PUT /api/v1/habits/{id} - 습관 수정
+
+**실행 순서:**
+1. **HTTP Request 수신** (Controller)
+   - `@PutMapping("/{id}")` 핸들러 메서드 호출
+   - Path Variable `id` 추출 및 `Long` 타입 변환
+   - Request Body를 `UpdateHabitRequest` DTO로 역직렬화
+
+2. **Request Validation** (Controller Layer)
+   - `@Valid` 어노테이션으로 DTO 검증 (선택적 필드이므로 빈 값 허용)
+
+3. **Service 메서드 호출** (`HabitService.update(id, request)`)
+
+4. **트랜잭션 시작** (`@Transactional`)
+
+5. **리소스 존재 확인** (Service Layer)
+   - `habitRepository.findById(id)` 실행
+   - `Optional<Habit>` 반환
+   - 없으면: `HabitNotFoundException` throw → `404 Not Found` 반환
+
+6. **Business Validation** (Service Layer)
+   - 이름 변경 시: `habitRepository.findByNameAndIdNot(newName, id).isPresent()` 체크
+   - 중복 발견 시: `HabitAlreadyExistsException` throw → `409 Conflict` 반환
+
+7. **Entity 부분 업데이트** (Service Layer)
+   - `request.getName() != null` → `habit.setName(request.getName())`
+   - `request.getIcon() != null` → `habit.setIcon(request.getIcon())`
+   - `request.getColor() != null` → `habit.setColor(request.getColor())`
+   - `request.getActiveDays() != null` → `habit.setActiveDays(request.getActiveDays())`
+   - `request.getDefaultDuration() != null` → `habit.setDefaultDuration(request.getDefaultDuration())`
+   - `request.getIsArchived() != null` → `habit.setIsArchived(request.getIsArchived())`
+
+8. **데이터베이스 저장** (Repository Layer)
+   - `habitRepository.save(habit)` 실행
+   - JPA가 UPDATE 쿼리 생성 및 실행
+   - `@LastModifiedDate` 자동 갱신 (JPA Auditing)
+
+9. **트랜잭션 커밋** (`@Transactional`)
+
+10. **Entity → DTO 변환 및 응답** (Service → Controller)
+    - `HabitResponse.from(updatedHabit)` 호출
+    - `200 OK` 상태 코드와 함께 응답 반환
+
+#### DELETE /api/v1/habits/{id} - 습관 삭제 (Soft Delete)
+
+**실행 순서:**
+1. **HTTP Request 수신** (Controller)
+   - `@DeleteMapping("/{id}")` 핸들러 메서드 호출
+   - Path Variable `id` 추출
+
+2. **Service 메서드 호출** (`HabitService.delete(id)`)
+
+3. **트랜잭션 시작** (`@Transactional`)
+
+4. **리소스 존재 확인** (Service Layer)
+   - `habitRepository.findById(id)` 실행
+   - 없으면: `HabitNotFoundException` throw → `404 Not Found` 반환
+
+5. **Soft Delete 처리** (Service Layer)
+   - `habit.setIsArchived(true)` 실행
+
+6. **데이터베이스 저장** (Repository Layer)
+   - `habitRepository.save(habit)` 실행
+   - JPA가 UPDATE 쿼리 생성: `UPDATE habits SET is_archived = true WHERE id = ?`
+
+7. **트랜잭션 커밋** (`@Transactional`)
+
+8. **HTTP Response 생성** (Controller)
+   - `ResponseEntity.noContent().build()` 생성
+   - `204 No Content` 상태 코드와 함께 응답 반환
+
+#### GET /api/v1/habits?dayOfWeek=MONDAY - 요일별 조회
+
+**실행 순서:**
+1. **HTTP Request 수신** (Controller)
+   - `@GetMapping` 핸들러 메서드 호출
+   - Query Parameter `dayOfWeek` 추출 및 `DayOfWeek` Enum 변환
+   - Query Parameter `archived`, `page`, `size`, `sort` 추출
+
+2. **Service 메서드 호출** (`HabitService.findAll(dayOfWeek, archived, pageable)`)
+
+3. **읽기 전용 트랜잭션 시작** (`@Transactional(readOnly = true)`)
+
+4. **쿼리 파라미터 검증** (Service Layer)
+   - `dayOfWeek`가 `null`이 아니면 `MONDAY` ~ `SUNDAY` 범위 검증
+
+5. **Repository 쿼리 실행** (Repository Layer)
+   - `dayOfWeek != null` → `habitRepository.findByActiveDaysContaining(dayOfWeek, pageable)` 실행
+   - JPQL 쿼리: `SELECT DISTINCT h FROM Habit h JOIN h.activeDays ad WHERE ad = :dayOfWeek AND h.isArchived = false`
+   - SQL 변환: `SELECT DISTINCT h.* FROM habits h INNER JOIN habit_active_days had ON h.id = had.habit_id WHERE had.day_of_week = 'MONDAY' AND h.is_archived = false LIMIT ? OFFSET ?`
+
+6. **데이터베이스 쿼리 실행** (Database)
+   - MySQL/H2에서 쿼리 실행
+   - 결과 반환
+
+7. **Entity → DTO 변환** (Service Layer)
+   - `Page<Habit>` → `Page<HabitResponse>` 변환
+   - `habits.map(HabitResponse::from)` 실행
+
+8. **읽기 전용 트랜잭션 종료** (`@Transactional(readOnly = true)`)
+
+9. **HTTP Response 생성** (Controller)
+   - `ResponseEntity.ok(pageResponse)` 생성
+   - `200 OK` 상태 코드와 함께 페이지네이션 정보 포함 응답 반환
 
 ---
 
-## 📊 구현 난이도 평가
+## 📊 Difficulty Assessment (난이도 평가)
 
 ### 전체 난이도: **중 (Medium)**
 
-#### 세부 난이도 분석
+**단일 에이전트 작업 단위:** 이 이슈는 한 명의 개발자가 2-3일 내에 독립적으로 완료할 수 있는 작업 단위입니다.
 
-| Task | 난이도 | 예상 시간 | 비고 |
-|------|--------|----------|------|
-| TASK-HABIT-DB-01 | 하 | 2-3시간 | 기본 JPA Entity, 표준 패턴 |
-| TASK-HABIT-REPO-01 | 하 | 1-2시간 | 기본 CRUD + 쿼리 메서드 |
-| TASK-HABIT-SERVICE-01 | 중 | 4-6시간 | 비즈니스 로직, 예외 처리 |
-| TASK-HABIT-CONTROLLER-01 | 중 | 3-4시간 | REST API, DTO 매핑, 검증 |
-| TASK-HABIT-DTO-01 | 하 | 2-3시간 | DTO 설계 및 구현 |
-| TASK-HABIT-TEST-01 | 중 | 4-6시간 | 단위/통합/API 테스트 |
+### 세부 난이도 분석
+
+| Task | 난이도 | 예상 시간 | 주요 작업량 | 비고 |
+|------|--------|----------|------------|------|
+| **TASK-HABIT-DB-01** | 하 (Low) | 2-3시간 | Entity 설계, Repository 인터페이스 | 기본 JPA Entity, 표준 패턴 |
+| **TASK-HABIT-SERVICE-01** | 중 (Medium) | 4-6시간 | 비즈니스 로직, 예외 처리, 트랜잭션 관리 | 중복 체크, Soft Delete 로직 |
+| **TASK-HABIT-CONTROLLER-01** | 중 (Medium) | 3-4시간 | REST API 엔드포인트, DTO 매핑, 검증 | 5개 엔드포인트 구현 |
+| **TASK-HABIT-DTO-01** | 하 (Low) | 2-3시간 | Request/Response DTO 설계 및 구현 | 3개 DTO 클래스 |
+| **TASK-HABIT-TEST-01** | 중 (Medium) | 4-6시간 | 단위/통합/API 테스트 작성 | 테스트 커버리지 80% 목표 |
 
 **총 예상 시간: 16-24시간 (2-3일)**
 
-#### 난이도 상세
+### 난이도 상세
 
-**하 (Low) - 1-3시간**
-- Entity 설계 (표준 JPA 패턴)
-- Repository 인터페이스 (Spring Data JPA)
-- 기본 DTO 구현
+#### 하 (Low) - 1-3시간
+- **Entity 설계**: 표준 JPA 패턴 사용 (`@Entity`, `@Table`, `@Column`)
+- **Repository 인터페이스**: Spring Data JPA 기본 메서드 + 커스텀 쿼리
+- **DTO 구현**: Lombok 사용, 정적 팩토리 메서드 패턴
 
-**중 (Medium) - 3-6시간**
-- 비즈니스 로직 구현 (중복 체크, Soft Delete)
-- 예외 처리 및 에러 응답
-- 요일별 필터링 쿼리 최적화
-- 테스트 작성 (Mockito, TestContainers)
+#### 중 (Medium) - 3-6시간
+- **비즈니스 로직**: 중복 체크, Soft Delete, 요일 필터링
+- **예외 처리**: 커스텀 예외 클래스 및 GlobalExceptionHandler 연동
+- **트랜잭션 관리**: `@Transactional` 어노테이션 사용
+- **테스트 작성**: Mockito를 사용한 단위 테스트, Spring Boot Test를 사용한 통합 테스트
 
-**상 (High) - 없음**
+#### 상 (High) - 없음
 - 복잡한 알고리즘이나 외부 시스템 연동 없음
+- 표준적인 CRUD 작업 위주
+
+### 작업량 분해
+
+**Day 1 (6-8시간):**
+- Entity 및 Repository 구현 (3시간)
+- DTO 구현 (2시간)
+- Service 기본 구조 및 생성 로직 (3-4시간)
+
+**Day 2 (6-8시간):**
+- Service 수정/삭제/조회 로직 (4시간)
+- Controller 구현 (3-4시간)
+
+**Day 3 (4-8시간):**
+- 테스트 작성 (4-6시간)
+- 버그 수정 및 리팩토링 (2시간)
 
 ---
 

@@ -6,6 +6,7 @@
 **Labels:** `type:qa`, `type:deployment`, `type:release`  
 **Related REQ:** -  
 **Dependencies:** #001, #002 ✅ (완료), #003, #004, #005, #006, #007, #008, #009, #010, #011, #012  
+**Parallelizable With:** None (모든 작업 완료 후 진행)  
 **Blocks:** None
 
 ---
@@ -16,12 +17,40 @@
 
 **참고:** 프론트엔드 PoC (#002)가 별도 프로젝트에서 완료되었으므로, 백엔드 API와의 연동 테스트를 포함하여 진행합니다.
 
+## 📌 Scope / Out of Scope
+
+### In Scope
+- 수동 테스트 및 버그 수정
+- 프로덕션 환경 설정 및 배포 준비
+- 문서화 완료 (API 문서, 배포 가이드)
+- 백엔드-프론트엔드 연동 테스트
+
+### Out of Scope
+- 새로운 기능 추가 (모든 기능은 이전 이슈에서 완료)
+- 대규모 리팩토링 (별도 이슈에서 처리)
+- 프로덕션 모니터링 설정 (Post-MVP)
+
 ## 🎯 Goals
 
 - 전체 기능 수동 테스트
 - 버그 수정
 - 성능 테스트
 - 배포 준비
+
+## 🛠️ Technical Stack
+
+**Testing:**
+- 수동 테스트
+- 부하 테스트 도구 (JMeter 또는 Gatling)
+
+**Deployment:**
+- Docker
+- CI/CD (GitHub Actions)
+- 환경 변수 관리
+
+**Monitoring:**
+- Spring Boot Actuator
+- 로깅 시스템
 
 ## ✅ Tasks
 
@@ -71,6 +100,73 @@
 
 - [빌드 및 환경 설정](.cursor/rules/101-build-and-env-setup.mdc)
 - [Task 문서](Tasks%20copy/Non-Functional/013_Final_QA_Deployment.md)
+
+## 🔄 Logic Steps (런타임 처리 순서)
+
+### 배포 프로세스
+
+**실행 순서:**
+1. **코드 빌드** (CI/CD Pipeline)
+   - `./gradlew clean build` 실행
+   - 테스트 자동 실행
+   - 테스트 실패 시 배포 중단
+
+2. **Docker 이미지 빌드** (CI/CD Pipeline)
+   - `docker build -t app:latest .` 실행
+   - 이미지 태그 지정
+
+3. **스테이징 환경 배포** (CI/CD Pipeline)
+   - 스테이징 서버에 배포
+   - 헬스 체크 확인
+
+4. **수동 테스트** (QA 팀)
+   - 전체 기능 테스트
+   - 버그 발견 시 수정 후 재배포
+
+5. **프로덕션 환경 배포** (CI/CD Pipeline)
+   - 프로덕션 서버에 배포
+   - 롤백 준비
+
+6. **모니터링** (운영 팀)
+   - 헬스 체크 모니터링
+   - 에러 로그 확인
+   - 성능 메트릭 확인
+
+## 📊 Difficulty Assessment (난이도 평가)
+
+### 전체 난이도: **중 (Medium)**
+
+**단일 에이전트 작업 단위:** 이 이슈는 한 명의 개발자가 5-7일 내에 독립적으로 완료할 수 있는 작업 단위입니다.
+
+### 세부 난이도 분석
+
+| Task | 난이도 | 예상 시간 | 주요 작업량 | 비고 |
+|------|--------|----------|------------|------|
+| **TASK-QA-MANUAL-01** | 중 (Medium) | 8-12시간 | 전체 기능 수동 테스트 | 체계적 테스트 |
+| **TASK-QA-BUG-01** | 중 (Medium) | 8-16시간 | 버그 수정 | 발견된 버그 수에 따라 변동 |
+| **TASK-DEPLOY-PREP-01** | 중 (Medium) | 4-6시간 | 프로덕션 환경 설정 | 환경 변수, 설정 파일 |
+| **TASK-DEPLOY-DOC-01** | 하 (Low) | 3-4시간 | 배포 문서 작성 | 가이드 문서 |
+| **TASK-DEPLOY-CI-01** | 중 (Medium) | 4-6시간 | CI/CD 파이프라인 설정 | GitHub Actions |
+
+**총 예상 시간: 27-44시간 (5-7일)**
+
+### 작업량 분해
+
+**Day 1-2 (8-12시간):**
+- 전체 기능 수동 테스트
+- 버그 목록 작성
+
+**Day 3-4 (8-16시간):**
+- 버그 수정
+- 재테스트
+
+**Day 5 (4-6시간):**
+- 프로덕션 환경 설정
+- 배포 문서 작성
+
+**Day 6-7 (4-6시간):**
+- CI/CD 파이프라인 설정
+- 최종 배포 및 모니터링
 
 ## 📌 Notes
 

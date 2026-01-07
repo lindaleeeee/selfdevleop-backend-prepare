@@ -7,6 +7,7 @@
 **Labels:** `epic:poc`, `type:ui`, `frontend`, `status:completed`  
 **Related REQ:** -  
 **Dependencies:** #001 ✅  
+**Parallelizable With:** None (완료됨)  
 **Blocks:** None (완료됨)
 
 ---
@@ -17,11 +18,32 @@
 
 **✅ 완료 상태:** 이 작업은 별도 프론트엔드 프로젝트에서 완료되었습니다. 백엔드 API 연동은 #005에서 진행됩니다.
 
+## 📌 Scope / Out of Scope
+
+### In Scope ✅
+- 핵심 UI 흐름의 프로토타입 구현
+- 성능 최적화 패턴 적용
+- Mock 데이터를 활용한 UI 검증
+
+### Out of Scope
+- 백엔드 API 연동 (#005에서 처리)
+- 실제 데이터 연동 (별도 이슈에서 처리)
+- 프로덕션 레벨 UI/UX (Post-MVP)
+
 ## 🎯 Goals
 
 - 핵심 UI 흐름의 프로토타입 구현
 - 성능 최적화 패턴 적용
 - Mock 데이터를 활용한 UI 검증
+
+## 🛠️ Technical Stack
+
+**Frontend Core:**
+- React / Vue.js (프론트엔드 프레임워크)
+- TypeScript
+- 상태 관리 라이브러리
+
+**Note:** 이 작업은 별도 프론트엔드 프로젝트에서 완료되었습니다.
 
 ## ✅ Tasks
 
@@ -56,6 +78,24 @@
 - [x] Mock 데이터로 전체 플로우 검증 완료 ✅
 
 **✅ 모든 Acceptance Criteria 달성 완료**
+
+## 📊 Difficulty Assessment (난이도 평가)
+
+### 전체 난이도: **중 (Medium)**
+
+**단일 에이전트 작업 단위:** 이 이슈는 한 명의 개발자가 3-4일 내에 독립적으로 완료할 수 있는 작업 단위입니다.
+
+### 세부 난이도 분석
+
+| Task | 난이도 | 예상 시간 | 주요 작업량 | 비고 |
+|------|--------|----------|------------|------|
+| **TASK-POC-001** | 중 (Medium) | 4-6시간 | Launcher Yes/No UI 구현 | UI 컴포넌트 개발 |
+| **TASK-POC-002** | 중 (Medium) | 4-6시간 | 성능 최적화 패턴 적용 | React.memo, useMemo 등 |
+| **TASK-POC-003** | 하 (Low) | 2-3시간 | Mock 데이터 준비 | JSON 데이터 |
+
+**총 예상 시간: 10-15시간 (3-4일)**
+
+**Note:** 이 작업은 별도 프론트엔드 프로젝트에서 완료되었습니다.
 
 ## 🔗 Related Documentation
 
