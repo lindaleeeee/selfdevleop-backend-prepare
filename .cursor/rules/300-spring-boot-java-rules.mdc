@@ -1,0 +1,56 @@
+---
+description: Java and Spring Boot coding standards and best practices
+globs: ["**/*.java", "**/*.gradle", "pom.xml"]
+alwaysApply: true
+---
+# Spring Boot & Java Rules
+
+## 1. Project Structure
+- **Package Layout:** `com.example.projectname.{domain}.{layer}`
+  - `controller`: Web layer, handles HTTP requests.
+  - `service`: Business logic layer.
+  - `repository`: Data access layer.
+  - `dto`: Data Transfer Objects.
+  - `entity`: JPA Entities.
+  - `exception`: Custom exceptions.
+  - `config`: Configuration classes.
+
+## 2. Spring Boot Best Practices
+- **Dependency Injection:** Always use Constructor Injection. Avoid `@Autowired` on fields.
+  ```java
+  // Good
+  @Service
+  @RequiredArgsConstructor
+  public class MyService {
+      private final MyRepository repository;
+  }
+  ```
+- **Controller:**
+  - Keep Controllers thin. Delegate all logic to Services.
+  - NEVER return Entity objects directly. Always map to/from DTOs.
+  - Use `ResponseEntity<T>` for precise control over HTTP status and headers.
+- **Service:**
+  - Mark read-only methods with `@Transactional(readOnly = true)`.
+  - Validate inputs early. Throw custom RuntimeExceptions for invalid states.
+- **Configuration:**
+  - Use `application.yml` over `application.properties`.
+  - Externalize secrets to environment variables.
+
+## 3. Java Coding Standards
+- **Naming:**
+  - Classes: `PascalCase`
+  - Methods/Variables: `camelCase`
+  - Constants: `UPPER_SNAKE_CASE`
+- **Modern Java:**
+  - Use `Optional` to avoid `NullPointerException` (return types only).
+  - Use `Record` classes for immutable DTOs (Java 14+).
+  - Use Stream API for collection processing where readable.
+- **Lombok:**
+  - Use `@Data` cautiously (can cause issues with JPA `hashCode`/`toString`).
+  - Prefer `@Getter`, `@Setter`, `@ToString` explicitly or `@Value` for immutable objects.
+  - Use `@RequiredArgsConstructor` for dependency injection.
+
+## 4. Error Handling
+- Use a global `@RestControllerAdvice` to handle exceptions centrally.
+- Define a standard `ErrorResponse` DTO (timestamp, status, error, message).
+- Do not expose internal stack traces to the client in production.

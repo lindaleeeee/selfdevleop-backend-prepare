@@ -1,41 +1,35 @@
 ---
-description: Project technical stack definition
+description: Project technical stack definition (Backend)
 alwaysApply: true
+---
 # Technical Stack
 Referenced in: [001-project-overview.mdc](001-project-overview.mdc)
 
 ## Backend Core
-- **Framework:** Spring Boot 4.0.1
-- **Language:** Java 21
-- **Build Tool:** Gradle
-- **API Style:** RESTful API
-- **Architecture:** Layered Architecture (Controller → Service → Repository)
+- **Language:** Java 17 LTS
+- **Framework:** Spring Boot 3.x
+- **Build Tool:** Gradle (Kotlin DSL preferred) or Maven
+- **Architecture:** Layered Architecture (Controller -> Service -> Repository)
 
-## Database
+## Database & Storage
 - **Primary DB:** MySQL 8.x (InnoDB, utf8mb4)
-- **ORM:** Spring Data JPA / Hibernate
-- **Migration:** Flyway or Liquibase (TBD)
+- **Persistence:** JPA / Hibernate
+- **Migrations:** Flyway or Liquibase (Recommended)
 
-## API Documentation
-- **OpenAPI/Swagger:** SpringDoc OpenAPI 3.x
+## API Interface
+- **Style:** RESTful API
+- **Documentation:** Swagger / OpenAPI 3.0
+- **Format:** JSON
 
 ## Testing
 - **Unit Testing:** JUnit 5, Mockito
-- **Integration Testing:** Spring Boot Test, TestContainers (for DB)
-- **API Testing:** REST Assured (optional)
+- **Integration Testing:** Spring Boot Test, H2 Database (for tests)
 
-## Security (Future)
-- **Authentication:** JWT (Spring Security)
-- **Encryption:** AES-256 for sensitive data at rest
-- **TLS:** TLS 1.2+ for all transit
-
-## Monitoring & Logging
-- **Logging:** SLF4J + Logback
-- **Monitoring:** Spring Boot Actuator (future)
+## Deployment (Target)
+- **Container:** Docker
+- **CI/CD:** GitHub Actions (Future)
 
 ## See also:
 - [003-development-guidelines.mdc](003-development-guidelines.mdc) for usage guidelines
-- [400-spring-boot-rules.mdc](400-spring-boot-rules.mdc) for Spring Boot specific rules
-- [401-rest-api-design-rules.mdc](401-rest-api-design-rules.mdc) for REST API design patterns
-- [402-jpa-database-rules.mdc](402-jpa-database-rules.mdc) for JPA and database patterns
-- [403-exception-handling-rules.mdc](403-exception-handling-rules.mdc) for exception handling
+- [300-spring-boot-java-rules.mdc](300-spring-boot-java-rules.mdc) for coding standards
+- [302-api-database-rules.mdc](302-api-database-rules.mdc) for API & DB rules
