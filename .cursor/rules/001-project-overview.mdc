@@ -1,43 +1,42 @@
 ---
-description: Project overview for Focus Habit Launcher Backend
+description: Project overview for Focus Habit Launcher (Backend)
 globs: ["**/*"]
 alwaysApply: true
-# PROJECT OVERVIEW: Focus Habit Launcher Backend
+---
+# PROJECT OVERVIEW: Focus Habit Launcher (Backend)
 
 ## Vision
-Help users with willpower depletion maintain consistent self-development habits by providing a backend API that supports habit tracking, alarm/notification management, and data visualization for mobile applications.
+A backend service for a habit launcher app designed for willpower-depleted knowledge workers. It helps users maintain focus and consistency by reducing digital distractions and providing a low-friction path to self-improvement activities.
 
-## Core Features
-- **Habit Management API:** CRUD operations for user habits (meditation, reading, exercise, etc.)
-- **Alarm/Timer Management:** Schedule and manage alarms/timers with notification integration
-- **Session Logging:** Track habit execution sessions with timestamps and metadata
-- **Statistics & Analytics:** Aggregate and visualize habit performance data (daily/weekly/monthly/yearly)
-- **Goal Management:** Set and track goals for each habit with achievement rate calculation
-- **Data Export:** Export session logs to CSV/XLSX format
-- **Quote Management:** Manage motivational quotes for NO flow
+## Core Features (Backend Scope)
+- **Habit Management:** CRUD operations for user habits (Meditation, Reading, Exercise, etc.).
+- **Alarm/Timer Management:** Fixed-time alarms, relative timers, labels, repeat patterns, OS notification integration.
+- **Session Logging:** Secure storage and retrieval of habit execution logs (duration, timestamp, text/voice memo).
+- **Analytics Engine:** Aggregation of daily/weekly/monthly/yearly statistics and streak calculation.
+- **Goal Tracking:** Monitoring progress against user-defined targets (count or duration based).
+- **Quote Service:** Management and serving of motivational quotes for the "NO" flow.
+- **Data Export:** Generation of CSV/XLSX reports for user data.
 
 ## Target Audience
-- **Primary Users:** Knowledge workers (20s-40s) with willpower depletion who struggle to maintain focus
-- **Mobile App Clients:** Android/iOS applications consuming REST API
-- **Future:** Web dashboard, analytics tools
+- **Knowledge Workers:** Struggle with digital distraction and decision fatigue.
+- **ADHD Tendencies:** Need clear, immediate options without complexity.
+- **Quantified Self Users:** Value objective data and progress visualization.
 
 ## Project Goals
-- **Reliability:** 99.5% uptime, < 1s response time (p95) for critical endpoints
-- **Data Integrity:** Zero data loss for habit logs and session records
-- **Scalability:** Support future cloud backup and multi-device synchronization
-- **Security:** Protect user data with encryption and secure authentication (future)
+- **Reliability:** Ensure 100% data integrity for user logs.
+- **Performance:** Sub-second response for launcher initialization and log saving.
+- **Scalability:** Design for future multi-device synchronization and cloud backup.
 
-## Success Metrics (North Star: API Reliability)
-- **API Response Time:** p95 < 1.0s for launcher screen, p95 < 1.5s for statistics
-- **Data Reliability:** 99.5%+ successful session log saves
-- **Error Rate:** < 0.5% failure rate for daily operations
-- **Uptime:** 99.5% availability SLA
+## Success Metrics
+- **API Latency:** Launcher screen p95 < 1.0s, Statistics p95 < 1.5s.
+- **Data Integrity:** 99.5%+ session log save success rate, Zero data loss.
+- **Error Rate:** Less than 0.5% daily operation failures.
+- **Availability:** 99.5% uptime SLA for API services.
 
 ## Project Philosophy
-- **Local-First:** MVP works offline with local database, cloud sync is optional enhancement
-- **RESTful Design:** Clean, intuitive API following REST principles
-- **Data Privacy:** Minimal data collection, user-controlled data export
-- **Backward Compatibility:** Maintain API versioning for mobile app updates
+- **Local-First Support:** Backend acts as a sync/backup target (Future) or primary store depending on stage.
+- **Privacy Centric:** Minimize data collection; secure storage of personal logs.
+- **Simplicity:** API design should be straightforward and RESTful.
 
 ## See also:
 - [002-tech-stack.mdc](002-tech-stack.mdc) for implementation details

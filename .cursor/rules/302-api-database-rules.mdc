@@ -1,0 +1,51 @@
+---
+description: API design and Database conventions
+globs: ["**/*.java", "**/*.sql", "**/application.yml"]
+alwaysApply: true
+---
+# API & Database Rules
+
+## 1. REST API Design
+- **Resource Naming:**
+  - Use plural nouns for resources (e.g., `/api/v1/habits`).
+  - Use kebab-case for URLs (e.g., `/api/v1/user-profiles`).
+- **HTTP Methods:**
+  - `GET`: Retrieve resources (Safe, Idempotent).
+  - `POST`: Create new resources.
+  - `PUT`: Full update of a resource.
+  - `PATCH`: Partial update.
+  - `DELETE`: Remove a resource.
+- **Status Codes:**
+  - `200 OK`: Success (GET, PUT, PATCH).
+  - `201 Created`: Success (POST).
+  - `204 No Content`: Success (DELETE).
+  - `400 Bad Request`: Validation failure.
+  - `401 Unauthorized`: Authentication missing/failed.
+  - `403 Forbidden`: Authenticated but permission denied.
+  - `404 Not Found`: Resource does not exist.
+  - `500 Internal Server Error`: Server-side crash.
+
+## 2. Database Conventions (MySQL)
+- **Naming:**
+  - Tables: `snake_case`, plural (e.g., `habit_logs`).
+  - Columns: `snake_case` (e.g., `created_at`, `user_id`).
+  - Primary Keys: `id` (BigInt/Long recommended).
+  - Foreign Keys: `referenced_table_id`.
+- **Types:**
+  - Booleans: `TINYINT(1)` (0 or 1).
+  - Timestamps: `DATETIME` or `TIMESTAMP`.
+  - Strings: `VARCHAR(255)` default, `TEXT` for long content.
+- **Metadata:**
+  - Every table should have `created_at` and `updated_at`.
+
+## 3. JPA / Hibernate Rules
+- **Entities:**
+  - Use `@Entity` and `@Table(name = "table_name")`.
+  - Use `@Id` and `@GeneratedValue(strategy = GenerationType.IDENTITY)` for MySQL.
+  - Implement `equals()` and `hashCode()` using ONLY the primary key (or a business key).
+- **Relationships:**
+  - Always prefer `LAZY` loading for `@OneToMany` and `@ManyToOne`.
+  - Avoid `EAGER` fetching to prevent performance issues.
+- **Performance:**
+  - Use `@Query` or EntityGraph to solve N+1 Select problems.
+  - Use pagination (`Pageable`) for list endpoints.

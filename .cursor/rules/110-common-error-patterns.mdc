@@ -2,107 +2,48 @@
 alwaysApply: true
 ---
 
-# Common Error Patterns: Backend Development
+/*
+Common Error Patterns & Fixes (Spring Boot Backend)
+==================================================
 
-## [1] CORS (Cross-Origin Resource Sharing) Configuration
+[1] LazyInitializationException (JPA)
 --------------------------------------------------
-**Problem:** Mobile app or frontend calling backend API gets CORS errors.
+- **Cause:** Accessing a lazy-loaded relationship/collection outside of a Transaction.
+- **Fix:** 
+  1. Ensure the Service method is annotated with `@Transactional`.
+  2. Use `@EntityGraph` in the Repository to fetch required relations eagerly for that specific query.
+  3. Map to DTO inside the Transactional boundary.
 
-**Solution:** Configure CORS in Spring Boot:
-```java
-@Configuration
-public class CorsConfig {
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                    .allowedOrigins("http://localhost:3000", "http://localhost:5173")
-                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                    .allowedHeaders("*")
-                    .allowCredentials(true);
-            }
-        };
-    }
-}
-```
-
-**TIP:** For production, use environment-specific allowed origins.
-
-## [2] Database Connection Issues
+[2] N+1 Select Problem
 --------------------------------------------------
-**Problem:** `Communications link failure` or `Connection refused` errors.
+- **Cause:** Fetching a list of entities and then accessing a related entity in a loop.
+- **Fix:**
+  - Use `JOIN FETCH` in JPQL.
+  - Use `@EntityGraph`.
+  - Validate with query logs (hibernate.show_sql=true).
 
-**Common Causes:**
-- MySQL server not running
-- Wrong connection URL/credentials
-- Firewall blocking port 3306
-- Database not created
-
-**Solution:**
-- Verify MySQL is running: `mysql -u root -p`
-- Check `application.properties` connection settings
-- Ensure database exists: `CREATE DATABASE habit_launcher_dev;`
-- Test connection manually before running app
-
-## [3] JPA/Hibernate Entity Mapping Errors
+[3] NullPointerException (DTO Mapping)
 --------------------------------------------------
-**Problem:** `Unknown entity`, `Table doesn't exist`, or `Column not found` errors.
+- **Cause:** Mapping null entity fields to DTO primitives or accessing null relations.
+- **Fix:**
+  - Use `Optional` for return types.
+  - Check for nulls in Mapper classes.
+  - Use Java 14+ Records (which enforce non-null by design often) or Lombok `@Builder` with validation.
 
-**Solution:**
-- Ensure entities are in the same package as `@SpringBootApplication`
-- Use `@Entity` annotation on entity classes
-- Check `@Table` and `@Column` annotations match database schema
-- Verify `spring.jpa.hibernate.ddl-auto` setting (use `update` for dev, `validate` for prod)
-
-## [4] Transaction Management Issues
+[4] CORS Issues (Backend Side)
 --------------------------------------------------
-**Problem:** Data not persisted, `TransactionRequiredException`, or partial updates.
+- **Cause:** Frontend (different origin) blocked from accessing API.
+- **Fix:**
+  - Add `@CrossOrigin(origins = "*")` to Controllers (Dev only).
+  - Configure global CORS via `WebMvcConfigurer` bean.
 
-**Solution:**
-- Use `@Transactional` on service methods that modify data
-- Ensure service methods are public (Spring AOP requirement)
-- Check exception handling - `@Transactional` rolls back on RuntimeException
-- Use `@Transactional(readOnly = true)` for read-only operations
-
-## [5] NullPointerException in Service Layer
+[5] Transaction Rollback Failures
 --------------------------------------------------
-**Problem:** NPE when accessing entity relationships or optional fields.
+- **Cause:** Catching exceptions inside a `@Transactional` method without re-throwing.
+- **Fix:**
+  - Let RuntimeExceptions bubble up to the GlobalExceptionHandler.
+  - If catching, explicitly call `TransactionAspectSupport.currentTransactionStatus().setRollbackOnly()`.
 
-**Solution:**
-- Always check for null before accessing: `if (entity != null) { ... }`
-- Use Optional properly: `entity.getOptionalField().orElse(defaultValue)`
-- Use `@NotNull` validation annotations on DTOs
-- Implement proper error handling with custom exceptions
-
-## [6] Validation Errors Not Returned Properly
 --------------------------------------------------
-**Problem:** Validation errors return 500 instead of 400 with error details.
-
-**Solution:**
-- Use `@Valid` or `@Validated` on controller method parameters
-- Implement `@ControllerAdvice` with `@ExceptionHandler` for `MethodArgumentNotValidException`
-- Return structured error response DTO with field-level errors
-
-## [7] Circular Dependency Issues
---------------------------------------------------
-**Problem:** `BeanCurrentlyInCreationException` or circular dependency warnings.
-
-**Solution:**
-- Avoid circular dependencies between services
-- Use `@Lazy` annotation if circular dependency is unavoidable
-- Refactor to extract common logic into separate service
-- Consider using events or callbacks instead of direct dependencies
-
-## [8] Date/Time Handling Issues
---------------------------------------------------
-**Problem:** Timezone mismatches, incorrect date comparisons, or serialization errors.
-
-**Solution:**
-- Use `LocalDateTime` or `ZonedDateTime` consistently
-- Configure timezone in `application.properties`: `spring.jackson.time-zone=UTC`
-- Use `@JsonFormat` for custom date formatting in DTOs
-- Store dates in UTC, convert to user timezone in API response
-
-**TIP:** Always implement proper exception handling with `@ControllerAdvice` and return meaningful error messages to clients.
+Refer to these patterns to proactively prevent common backend issues!
+*/

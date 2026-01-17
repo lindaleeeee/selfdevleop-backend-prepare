@@ -10,37 +10,38 @@ Referenced in: [001-project-overview.mdc](001-project-overview.mdc), [002-tech-s
 - **System:** Git
 - **Repository:** GitHub
 - **Branching:** Git Flow / Feature Branch Workflow
-- **Commit Policy:** Atomic commits, Conventional Commits format.
+- **Commit Policy:** Atomic commits, Conventional Commits format (feat, fix, chore, refactor, docs).
 
-## Technology Constraints (C-TEC)
+## Technology Constraints
 - **Backend Core:** Java 21 + Spring Boot 4.0.1 (REST API).
-- **Database:** MySQL 8.x (InnoDB, utf8mb4).
-- **Build Tool:** Gradle (latest stable).
-- **API Documentation:** OpenAPI 3.x (SpringDoc).
+- **Database:** MySQL 8.x.
+- **ORM:** Spring Data JPA / Hibernate.
+- **Security:** Spring Security (Stateless, JWT based if Auth is implemented).
 
 ## Architecture Principles
-- **Layered Architecture:** Controller → Service → Repository pattern.
-- **RESTful Design:** Follow REST conventions for resource naming and HTTP methods.
-- **Security:**
-  - TLS 1.2+ for all transit (production).
-  - AES-256 for sensitive data at rest (future).
-  - User-level data isolation.
-- **Reliability:**
-  - Transaction management for data consistency.
-  - Proper exception handling with meaningful error messages.
-  - Data validation at API boundary.
+- **Separation of Concerns:** Distinct layers for Web (Controller), Business Logic (Service), and Data Access (Repository).
+- **Statelessness:** API should be stateless to support horizontal scaling.
+- **Data Integrity:** Use Transactions (@Transactional) for all state-changing operations.
+- **Fail-Safe:** Graceful error handling with standardized error responses.
 
 ## Performance Standards (NFR)
-- **API Response Time:** Launcher screen < 1.0s (p95), Statistics < 1.5s (p95).
-- **Database Queries:** Optimize N+1 queries, use proper indexing.
-- **Availability:** 99.5% uptime SLA (production).
+- **API Latency:** Launcher screen p95 < 1.0s, Statistics p95 < 1.5s.
+- **Data Reliability:** 99.5%+ session log save success rate.
+- **Error Rate:** Less than 0.5% daily operation failures.
+- **Database:** Indexed queries for high-volume read tables (Logs).
+- **Cold Start:** Minimize startup time for container efficiency.
 
 ## Development Priorities
-1. **Data Integrity:** Zero data loss for habit logs and session records.
-2. **API Reliability:** Consistent error handling and response formats.
-3. **Performance:** Optimize database queries and minimize response times.
-4. **Code Quality:** Follow Spring Boot best practices and maintain clean architecture.
+1. **Correctness:** Logic for streak calculation and stats aggregation must be accurate.
+2. **Robustness:** Handle invalid inputs and edge cases (e.g., negative durations, future timestamps) gracefully.
+3. **Maintainability:** Clear code structure, meaningful naming, and Javadoc for public methods.
+
+## Coding Standards
+- **Naming:** CamelCase for Java classes/methods, snake_case for Database tables/columns.
+- **Lombok:** Use sparingly; prefer Records for DTOs if possible, or @Data/@Builder with care.
+- **Logging:** Use SLF4J. Log meaningful events, not just method entries.
 
 ## See also:
 - [001-project-overview.mdc](001-project-overview.mdc)
 - [002-tech-stack.mdc](002-tech-stack.mdc)
+- [300-spring-boot-java-rules.mdc](300-spring-boot-java-rules.mdc)
