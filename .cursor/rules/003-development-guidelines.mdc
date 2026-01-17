@@ -13,9 +13,9 @@ Referenced in: [001-project-overview.mdc](001-project-overview.mdc), [002-tech-s
 - **Commit Policy:** Atomic commits, Conventional Commits format (feat, fix, chore, refactor, docs).
 
 ## Technology Constraints
-- **Backend Core:** Java 17 + Spring Boot 3.x (REST API).
+- **Backend Core:** Java 21 + Spring Boot 4.0.1 (REST API).
 - **Database:** MySQL 8.x.
-- **ORM:** Spring Data JPA.
+- **ORM:** Spring Data JPA / Hibernate.
 - **Security:** Spring Security (Stateless, JWT based if Auth is implemented).
 
 ## Architecture Principles
@@ -25,7 +25,9 @@ Referenced in: [001-project-overview.mdc](001-project-overview.mdc), [002-tech-s
 - **Fail-Safe:** Graceful error handling with standardized error responses.
 
 ## Performance Standards (NFR)
-- **API Latency:** Core endpoints (Save Log, Fetch Config) < 200ms.
+- **API Latency:** Launcher screen p95 < 1.0s, Statistics p95 < 1.5s.
+- **Data Reliability:** 99.5%+ session log save success rate.
+- **Error Rate:** Less than 0.5% daily operation failures.
 - **Database:** Indexed queries for high-volume read tables (Logs).
 - **Cold Start:** Minimize startup time for container efficiency.
 

@@ -10,11 +10,12 @@ A backend service for a habit launcher app designed for willpower-depleted knowl
 
 ## Core Features (Backend Scope)
 - **Habit Management:** CRUD operations for user habits (Meditation, Reading, Exercise, etc.).
-- **Session Logging:** Secure storage and retrieval of habit execution logs (duration, timestamp).
-- **Analytics Engine:** Aggregation of daily/weekly/monthly statistics and streak calculation.
-- **Goal Tracking:** Monitoring progress against user-defined targets.
+- **Alarm/Timer Management:** Fixed-time alarms, relative timers, labels, repeat patterns, OS notification integration.
+- **Session Logging:** Secure storage and retrieval of habit execution logs (duration, timestamp, text/voice memo).
+- **Analytics Engine:** Aggregation of daily/weekly/monthly/yearly statistics and streak calculation.
+- **Goal Tracking:** Monitoring progress against user-defined targets (count or duration based).
 - **Quote Service:** Management and serving of motivational quotes for the "NO" flow.
-- **Data Export:** Generation of CSV/Excel reports for user data.
+- **Data Export:** Generation of CSV/XLSX reports for user data.
 
 ## Target Audience
 - **Knowledge Workers:** Struggle with digital distraction and decision fatigue.
@@ -27,9 +28,10 @@ A backend service for a habit launcher app designed for willpower-depleted knowl
 - **Scalability:** Design for future multi-device synchronization and cloud backup.
 
 ## Success Metrics
-- **API Latency:** p95 < 200ms for core endpoints.
-- **Data Integrity:** Zero data loss for synced logs.
-- **Availability:** 99.9% uptime for API services.
+- **API Latency:** Launcher screen p95 < 1.0s, Statistics p95 < 1.5s.
+- **Data Integrity:** 99.5%+ session log save success rate, Zero data loss.
+- **Error Rate:** Less than 0.5% daily operation failures.
+- **Availability:** 99.5% uptime SLA for API services.
 
 ## Project Philosophy
 - **Local-First Support:** Backend acts as a sync/backup target (Future) or primary store depending on stage.

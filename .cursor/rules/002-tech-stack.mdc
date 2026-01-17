@@ -6,9 +6,9 @@ alwaysApply: true
 Referenced in: [001-project-overview.mdc](001-project-overview.mdc)
 
 ## Backend Core
-- **Language:** Java 17 LTS
-- **Framework:** Spring Boot 3.x
-- **Build Tool:** Gradle (Kotlin DSL preferred) or Maven
+- **Language:** Java 21
+- **Framework:** Spring Boot 4.0.1
+- **Build Tool:** Gradle (latest stable)
 - **Architecture:** Layered Architecture (Controller -> Service -> Repository)
 
 ## Database & Storage
@@ -23,7 +23,8 @@ Referenced in: [001-project-overview.mdc](001-project-overview.mdc)
 
 ## Testing
 - **Unit Testing:** JUnit 5, Mockito
-- **Integration Testing:** Spring Boot Test, H2 Database (for tests)
+- **Integration Testing:** Spring Boot Test, TestContainers (for DB)
+- **API Testing:** REST Assured (optional)
 
 ## Deployment (Target)
 - **Container:** Docker
