@@ -20,6 +20,14 @@
 *   **내용**: 주요 함수 호출 흐름, 이벤트 시퀀스(Mermaid), 파일별 핵심 로직 매핑
 *   **활용**: 버그 트러블슈팅, 로직 흐름 추적, 사이드 이펙트 분석
 
+### 5. [05-api-design-diagrams.md](05-api-design-diagrams.md)
+*   **내용**: API 요청부터 응답까지의 데이터 흐름 시퀀스 다이어그램 (Mermaid)
+*   **활용**: API 구현 전 설계 확인, 데이터 흐름 이해, 컨트롤러-서비스-리포지토리 계층 간 상호작용 파악
+
+### 6. [06-data-architecture-erd-cld-orm.md](06-data-architecture-erd-cld-orm.md)
+*   **내용**: ERD (데이터베이스 설계), CLD (백엔드 클래스 다이어그램), ORM 예제코드 (JPA Entity, Repository)
+*   **활용**: 데이터베이스 설계부터 백엔드 구현까지의 전체 데이터 아키텍처 이해, ERD → CLD → ORM 흐름 파악
+
 ## 💡 활용 팁
 1.  **개발 시**: 작업하려는 파일 상단의 JSDoc을 먼저 확인하세요.
 2.  **디버깅 시**: `04-function-call-hierarchy.md`를 참고하여 데이터 흐름을 추적하세요.
