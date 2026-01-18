@@ -1,17 +1,30 @@
 ---
 description: Enables AI agents to perform Git Flow-compliant commit and PR processes using Git CLI automation.
-alwaysApply: false
+alwaysApply: true
 ---
 # Git CLI Usage for Git Flow
+
+## ⚠️ MANDATORY: Branch Check Before Any Git Operation
+
+**BEFORE staging, committing, or pushing:**
+1. **ALWAYS** run `git branch --show-current` first
+2. **IF** branch is `main`, `master`, or `dev`:
+   - **STOP** - Do NOT proceed
+   - **MUST** create feature branch: `git checkout -b <type>/<description>`
+   - Valid prefixes: `feat/`, `fix/`, `docs/`, `refactor/`, `test/`, `chore/`
+3. **VERIFY** branch name matches work intent before proceeding
+
+## Git Operations Workflow
 - Use `git status` and `git diff` to review changes
 - Stage using `git add -p` for atomic commits, and avoid unrelated mixed commits
 - Commit with Conventional Commits style (Descriptive commit messages)
-- Commit title format: `[<category name for changes>] <message>`
+- Commit title format: `<type>(<scope>): <subject>` (Conventional Commits)
 - One purpose per commit(atomic-commit), avoiding mixed intent changes or not compilable commit point
 
-# Branch and Remote Repository
-- Check current branch matches change intent (release/, feat/, fix/, doc/, etc)
-- If not matched, create a proper branch with proper prefix (release/, feat/, fix/, doc/, etc)
+## Branch and Remote Repository
+- **MANDATORY:** Check current branch matches change intent (release/, feat/, fix/, doc/, etc)
+- **MANDATORY:** If on `main`/`master`/`dev`, create proper branch with proper prefix FIRST
+- **FORBIDDEN:** Never commit directly to `main`, `master`, or `dev` branches
 - One purpose per branch, avoiding many module changes per branch
 - Push to remote via `git push -u origin <branch>`
 - Verify GitHub credential via `git ls-remote`; prompt if missing

@@ -1,8 +1,27 @@
 ---
 description: Git commit, push, and Pull Request best practices for team collaboration and AI agent safety
-alwaysApply: false
+alwaysApply: true
 ---
 # Git Commit, Push, and PR Rules
+
+## ⚠️ CRITICAL: Branch Check Before Any Commit
+
+**MANDATORY PRE-COMMIT CHECKLIST:**
+1. **ALWAYS** run `git branch --show-current` BEFORE staging or committing
+2. **IF** current branch is `main`, `master`, or `dev`:
+   - **STOP** immediately
+   - **DO NOT** commit or push
+   - **MUST** create feature branch first: `git checkout -b <type>/<description>`
+   - **THEN** proceed with commit
+3. **VERIFY** branch name matches work type (feat/, fix/, docs/, etc.)
+4. **ONLY** proceed with commit if branch name follows pattern: `<type>/<description>`
+
+## Branch Strategy
+- **MANDATORY:** ALWAYS create issue-specific branch BEFORE starting work
+- **FORBIDDEN:** NEVER commit directly to `main`, `master`, or `dev` branches
+- Branch naming: `<type>/<issue-number>-<short-description>` or `<type>/<short-description>`
+  - Examples: `feat/123-user-auth`, `fix/456-payment-bug`, `docs/789-api-guide`, `docs/github-issues-epic0`
+- Push branch to remote immediately: `git push -u origin <branch-name>`
 
 ## Atomic Commits
 - One logical change per commit (single purpose, fully functional)
@@ -17,16 +36,11 @@ alwaysApply: false
 - Body (optional): detailed explanation, wrap at 72 chars
 - Footer (optional): reference issues with `Closes #123` or `Refs #456`
 
-## Branch Strategy
-- ALWAYS create issue-specific branch before starting work
-- Branch naming: `<type>/<issue-number>-<short-description>`
-  - Examples: `feat/123-user-auth`, `fix/456-payment-bug`, `docs/789-api-guide`
-- Push branch to remote immediately: `git push -u origin <branch-name>`
-- Never commit directly to `main`, `master`, or `dev` branches
-
 ## AI Agent Safety Rules
-- Run `git status` and `git diff` before any commit
-- Verify correct branch with `git branch --show-current`
+- **STEP 1:** Run `git branch --show-current` to check current branch
+- **STEP 2:** If on `main`/`master`/`dev`, create feature branch FIRST
+- **STEP 3:** Run `git status` and `git diff` before any commit
+- **STEP 4:** Verify correct branch with `git branch --show-current` again
 - Use `--no-verify` ONLY when explicitly requested by user
 - NEVER force push (`--force`, `-f`) without explicit user confirmation
 - Check remote connection before push: `git ls-remote`
@@ -56,8 +70,17 @@ Closes #234"
 </example>
 
 <bad-example>
-# Bad: Mixed changes, vague message
+# ❌ BAD: Committing to main directly
+git checkout main
 git add .
-git commit -m "updates"
-git push origin main  # ❌ Pushing to main directly
+git commit -m "updates"  # ❌ FORBIDDEN: Cannot commit to main
+git push origin main  # ❌ FORBIDDEN: Cannot push to main
+
+# ✅ GOOD: Proper workflow
+git checkout main
+git pull origin main
+git checkout -b feat/123-user-auth  # ✅ Create branch first
+git add .
+git commit -m "feat(auth): implement user authentication"
+git push -u origin feat/123-user-auth  # ✅ Push feature branch
 </bad-example>
